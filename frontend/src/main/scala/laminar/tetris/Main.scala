@@ -1,4 +1,4 @@
-package tetris
+package laminar.tetris
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 

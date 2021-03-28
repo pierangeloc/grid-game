@@ -5,7 +5,7 @@
   },
   "name": "laminar-tetris",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
   "dependencies": {
     "acorn": "^8.1.0",
     "ajv": "^6.12.6",
