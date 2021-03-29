@@ -1,11 +1,10 @@
 package laminar.tetris
 
-import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+import scala.scalajs.js.annotation.{JSExportTopLevel}
 
-@JSExportTopLevel("App")
 object Main {
-  @JSExport
-  def start(): Unit = {
-    println("Hello world!")
+  @JSExportTopLevel("main")
+  def main(): Unit = {
+    println("Hello people!")
   }
 }
