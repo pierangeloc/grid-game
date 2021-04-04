@@ -13,7 +13,7 @@ object Dependencies {
     val catsEffect = "2.2.0"
     val circe      = "0.12.1"
 
-    val laminar    = "0.9.0"
+    val laminar    = "0.12.2"
   }
 
   object Frontend {

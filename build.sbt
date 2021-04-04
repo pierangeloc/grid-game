@@ -23,7 +23,8 @@ lazy val frontend =
       libraryDependencies ++= Dependencies.Frontend.all.value,
       npmDependencies in Compile ++= Seq("react" -> "16.13.1",
         "react-dom" -> "16.13.1",
-        "react-proxy" -> "1.1.8"
+        "react-proxy" -> "1.1.8",
+        "postcss-import" -> "14.0.1"
       ),
       npmDevDependencies in Compile ++= Seq(
         "file-loader" -> "6.0.0",
@@ -31,7 +32,11 @@ lazy val frontend =
         "css-loader" -> "3.5.3",
         "html-webpack-plugin" -> "4.3.0",
         "copy-webpack-plugin" -> "5.1.1",
-        "webpack-merge" -> "4.2.2"
+        "webpack-merge" -> "4.2.2",
+        "postcss-loader" -> "4.1.0",
+        "postcss" -> "8.2.6",
+        "tailwindcss" -> "2.0.1",
+        "autoprefixer" -> "10.0.2",
       ),
       libraryDependencies ++= Seq(
         "me.shadaj" %%% "slinky-web" % "0.6.5",
