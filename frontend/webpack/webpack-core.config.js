@@ -1,6 +1,7 @@
 var path = require("path");
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var colors = require('tailwindcss/colors');
 
 module.exports = {
   mode: "development",
