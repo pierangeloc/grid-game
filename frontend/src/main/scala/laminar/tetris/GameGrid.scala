@@ -56,6 +56,6 @@ object Cell {
       )
     )
     _ <- console.putStrLn("Built the div")
-    _ <- colors.take(5).foreach(c => console.putStrLn(s"Color: ${c}"))//.fork
+    _ <- colors.foreach(c => console.putStrLn(s"Color: ${c}") *> UIO.effectTotal(varColor.set(c))).forkDaemon
   } yield div
 }
