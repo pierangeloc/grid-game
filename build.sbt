@@ -20,7 +20,6 @@ lazy val frontend =
     .settings(commonSettings)
     .settings(
       scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
-      libraryDependencies ++= Dependencies.Frontend.all.value,
       npmDependencies in Compile ++= Seq("react" -> "16.13.1",
         "react-dom" -> "16.13.1",
         "react-proxy" -> "1.1.8",
@@ -41,7 +40,9 @@ lazy val frontend =
       libraryDependencies ++= Seq(
         "me.shadaj" %%% "slinky-web" % "0.6.5",
         "me.shadaj" %%% "slinky-hot" % "0.6.5"
-      ),
+      ) ++ (Dependencies.Frontend.all.value ++
+        zio.value ++ dateTime.value
+        ),
       webpack / version := "4.43.0",
       startWebpackDevServer / version := "3.11.0",
       webpackResources := baseDirectory.value / "webpack" * "*",

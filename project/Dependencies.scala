@@ -5,8 +5,8 @@ object Dependencies {
   object Versions {
     val http4s = "0.21.0-M6"
 
-    val zio       = "1.0.3"
-    val zioCats   = "2.2.0.1"
+    val zio       = "1.0.5"
+    val zioCats   = "2.4.0.0"
 
     val fs2        = "2.4.4"
     val cats       = "2.2.0"
@@ -24,16 +24,19 @@ object Dependencies {
     )
   }
 
-  val scalaTest  = "org.scalatest" %% "scalatest"   % "3.0.5"
+  val zio        = Def.setting(
+    Seq(
+      "dev.zio"       %%% "zio"              % Versions.zio,
+      "dev.zio"       %%% "zio-streams"      % Versions.zio,
+      "dev.zio"       %%% "zio-interop-cats" % Versions.zioCats
+    )
+  )
 
-  val cats       = "org.typelevel" %% "cats-core"   % Versions.cats
-  val catsEffect = "org.typelevel" %% "cats-effect" % Versions.catsEffect
+  val dateTime: Def.Initialize[Seq[ModuleID]] = Def.setting {
+    Seq(
+      "io.github.cquiroz" %%% "scala-java-time"      % "2.2.0",
+      "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.2.0"
+    )
+  }
 
-  val zio         = "dev.zio"       %% "zio"              % Versions.zio
-  val zioStreams  = "dev.zio"       %% "zio-streams"      % Versions.zio
-  val zioCats     = "dev.zio"       %% "zio-interop-cats" % Versions.zioCats
-
-  val cask        =  "com.lihaoyi" %% "cask" % "0.6.5"
-
-  val fs2         = "co.fs2" %% "fs2-io" % Versions.fs2
 }
