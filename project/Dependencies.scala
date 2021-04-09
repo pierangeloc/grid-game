@@ -12,6 +12,7 @@ object Dependencies {
     val cats       = "2.2.0"
     val catsEffect = "2.2.0"
     val circe      = "0.12.1"
+    val refined    = "0.9.23"
 
     val laminar    = "0.12.2"
   }
@@ -29,6 +30,12 @@ object Dependencies {
       "dev.zio"       %%% "zio"              % Versions.zio,
       "dev.zio"       %%% "zio-streams"      % Versions.zio,
       "dev.zio"       %%% "zio-interop-cats" % Versions.zioCats
+    )
+  )
+
+  val refined = Def.setting(
+    Seq(
+      "eu.timepit" %%% "refined" % Versions.refined
     )
   )
 

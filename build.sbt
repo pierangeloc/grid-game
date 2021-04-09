@@ -1,7 +1,5 @@
 import Dependencies._
 
-
-
 lazy val commonSettings = inThisBuild(
     Seq(
       scalaVersion := "2.13.1",
@@ -20,6 +18,7 @@ lazy val frontend =
     .settings(commonSettings)
     .settings(
       scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+      scalacOptions ++= Seq("-Ymacro-annotations"),
       npmDependencies in Compile ++= Seq("react" -> "16.13.1",
         "react-dom" -> "16.13.1",
         "react-proxy" -> "1.1.8",
@@ -40,8 +39,8 @@ lazy val frontend =
       libraryDependencies ++= Seq(
         "me.shadaj" %%% "slinky-web" % "0.6.5",
         "me.shadaj" %%% "slinky-hot" % "0.6.5"
-      ) ++ (Dependencies.Frontend.all.value ++
-        zio.value ++ dateTime.value
+      ) ++ (Frontend.all.value ++
+        zio.value ++ dateTime.value ++ refined.value
         ),
       webpack / version := "4.43.0",
       startWebpackDevServer / version := "3.11.0",
