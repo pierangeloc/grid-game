@@ -1,4 +1,4 @@
-package laminar.tetris
+package game
 
 import com.raquo.laminar.api.L._
 import org.scalajs.dom.raw.Element

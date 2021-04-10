@@ -1,9 +1,10 @@
-package laminar.tetris
+package game
 
 import eu.timepit.refined.numeric.NonNegative
 import eu.timepit.refined.{refineMV, refineV}
-import laminar.tetris.GameEngine.{Score, State}
-import laminar.tetris.Grid.ColorMap
+import game.GameEngine.Score
+import GameEngine.{Score, State}
+import Grid.ColorMap
 import zio.clock.Clock
 import zio.{Has, UIO, ZIO}
 import zio.random.Random

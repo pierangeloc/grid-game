@@ -1,4 +1,4 @@
-package laminar.tetris
+package game
 
 import org.scalajs.dom.document
 import zio.{BootstrapRuntime, CancelableFuture, UIO, URIO, ZEnv, ZIO}

@@ -1,10 +1,11 @@
-package laminar.tetris
+package game
 
 import zio.{UIO, URIO}
 import zio.stream._
 import com.raquo.laminar.api.L._
-import laminar.tetris.Cell.{colorToCls, defaultSize}
-import laminar.tetris.GameEngine.{Score, State}
+import game.GameEngine.Score
+import game.Cell.{colorToCls, defaultSize}
+import game.GameEngine.{Score, State}
 
 sealed trait Color
 object Color {
@@ -13,8 +14,11 @@ object Color {
   case object Blue extends Color
   case object Yellow extends Color
   case object Background extends Color
+  case object Orange extends Color
+  case object Cyan extends Color
+  case object Purple extends Color
 
-  val all = List(Background, Red, Green, Blue, Yellow)
+  val all = List(Background, Red, Green, Blue, Yellow, Orange, Cyan, Purple)
 
   def fromIndex(i: Int): Color = all(i.abs.toInt % all.size)
 }
@@ -30,10 +34,13 @@ object Cell {
 
   def colorToCls(color: Color): List[String] = color match {
     case Color.Background => List("bg-gray-800")
-    case Color.Red => List("bg-red-500")
-    case Color.Green => List("bg-green-500")
-    case Color.Blue => List("bg-blue-500")
-    case Color.Yellow => List("bg-yellow-500")
+    case Color.Red        => List("bg-red-500")
+    case Color.Green      => List("bg-green-500")
+    case Color.Blue       => List("bg-blue-500")
+    case Color.Yellow     => List("bg-yellow-200")
+    case Color.Cyan       => List("bg-blue-200")
+    case Color.Orange     => List("bg-yellow-600")
+    case Color.Purple     => List("bg-purple-500")
   }
 }
 
