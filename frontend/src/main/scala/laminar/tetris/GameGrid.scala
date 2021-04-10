@@ -33,7 +33,7 @@ object Cell {
     case Color.Red => List("bg-red-500")
     case Color.Green => List("bg-green-500")
     case Color.Blue => List("bg-blue-500")
-    case Color.Yellow =>  println("yellow!"); List("bg-yellow-500")
+    case Color.Yellow => List("bg-yellow-500")
   }
 }
 
@@ -81,13 +81,14 @@ object GameScore {
 
   def fromScoreStream[R](scores: ZStream[R, Nothing, Score]): URIO[R, Div] = for {
     varState <- UIO.effectTotal(Var[Score](Score(0)))
+    _ <- UIO.effectTotal(println("VAR DEFINED"))
     div  <- UIO.effectTotal(
       div(
         cls := ("flex", "flex-row", "border-8", "py-11"),
         p("Score", cls := ("text-base", "border-4")),
         p(
           cls := "border-4",
-          value <-- varState.signal.map(_.points.toString)
+          child.text <-- varState.signal.map(_.points.toString)
         )
       )
     )
