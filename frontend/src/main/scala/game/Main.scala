@@ -23,7 +23,10 @@ object Main extends BootstrapRuntime {
   val program: URIO[zio.ZEnv, Unit] = (for {
     container <- UIO.effectTotal(document.getElementById("root"))
     _ <- GameRendering.renderInContainer(container, "Random", Grid.defaultWidth, Grid.defaultHeight)
-  } yield ()).provideLayer(RandomGameEngine.layer(Grid.defaultWidth, Grid.defaultHeight))
+  } yield ()).provideLayer(
+//    RandomGameEngine.layer(Grid.defaultWidth, Grid.defaultHeight)
+    TetrisGameEngine.layer
+  )
 
 }
 
