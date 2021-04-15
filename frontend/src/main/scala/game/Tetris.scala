@@ -1,128 +1,121 @@
 package game
 
 import game.GameEngine.State
+import game.Grid.GridPosition
+import game.Tetris.Tetromino.{Position, color}
 import game.Tetris.Tetromino
-import game.Tetris.Tetromino.{Position, Rotation}
 import zio.clock.Clock
 import zio.stream.{UStream, ZStream}
 import zio.{Has, ZIO, ZLayer}
 
 object Tetris {
 
-  //TIL the Tetris pieces are called https://tetris.fandom.com/wiki/Tetromino
-  sealed trait Tetromino
-  object Tetromino {
-    case object I extends Tetromino
-    case object J extends Tetromino
-    case object L extends Tetromino
-    case object O extends Tetromino
-    case object S extends Tetromino
-    case object T extends Tetromino
-    case object Z extends Tetromino
-
-    type Matrix = List[List[Int]]
-    //The position of a Tetromino in the grid. Top left is (0, 0), growing to the bottom right
-    case class Position(x: NonNeg, y: NonNeg)
-    sealed trait Rotation
-    object Rotation {
-      case object North extends Rotation
-      case object East extends Rotation
-      case object South extends Rotation
-      case object West extends Rotation
-
-      def next(rotation: Rotation): Rotation = rotation match {
-        case North => East
-        case East  => South
-        case South => West
-        case West  => North
-      }
+  case class Tetromino(position: Position, kind: Tetromino.Kind, relativePos: List[Position]) {
+    def rotate90: Tetromino = {
+      copy(
+        relativePos = relativePos
+          .map { case Position(x, y) => Position(-y, x) }
+      )
     }
 
-    /**
-     * Matrix representation of every piece. This makes the rotation algorithm very simple
-     */
-    def matrixRepr(t: Tetromino): Matrix = t match {
-      case I => List(List(1, 1, 1, 1))
-      case J => List(List(1, 0, 0),
-                     List(1, 1, 1))
-      case L => List(List(0, 0, 1),
-                     List(1, 1, 1))
-      case O => List(List(1, 1),
-                     List(1, 1))
-      case S => List(List(0, 1, 1),
-                     List(1, 1, 0))
-      case T => List(List(1, 1, 1),
-                     List(0, 1, 0))
-      case Z => List(List(1, 1, 0),
-                     List(0, 1, 1))
-    }
+    def moveRight = copy(position = position.right)
+    def moveLeft  = copy(position = position.left)
+    def moveUp    = copy(position = position.up)
+    def moveDown  = copy(position = position.down)
 
-    /**
-     * see https://vikkrraant.medium.com/scala-style-matrix-rotation-and-spirals-post-5-46211a77ebe6
-     */
-    def rotate(m: Matrix): Matrix = m.transpose.map(_.reverse)
-    def rotate(original: Matrix, rotation: Rotation): Matrix = rotation match {
-      case Rotation.North => original
-      case Rotation.East  => rotate(original)
-      case Rotation.South => rotate(rotate(original))
-      case Rotation.West  => rotate(rotate(rotate(original)))
+    //this way we can calculate positions on the grid even of blocks (partially) out of the grid
+    def occupiedGrid: List[GridPosition] = relativePos.map(rp => Position(rp.x + position.x, rp.y + position.y)).collect {
+      case Position(x, y) if x > 0 && y < 0 => GridPosition(unsafeNonNeg(x), unsafeNonNeg(-y))
     }
-
-    def matrixWithPositions(m: Matrix): List[((Int, Int), Int)] = m.map(_.zipWithIndex).zipWithIndex.flatMap {
-      case (row, rowIx) => row.map {
-        case (col, colIx) => ((rowIx, colIx), col)
-      }
-    }
-
-    def positions(m: Matrix, origin: Position): List[Position] = matrixWithPositions(m).collect {
-      case ((x, y), 1) => Position(unsafeNonNeg(origin.x.value + x), unsafeNonNeg(origin.y.value + y))
-    }
-
-    def color(t: Tetromino): Color = t match {
-      case I => Color.Cyan
-      case J => Color.Blue
-      case L => Color.Orange
-      case O => Color.Yellow
-      case S => Color.Green
-      case T => Color.Purple
-      case Z => Color.Red
-    }
-
-    def blocksToGridState(blocks: List[(Position, Tetromino, Rotation)], w: NonNeg, h: NonNeg): State = {
-      blocks.map {
-        case (pos, block, rotation) =>
-          val col = color(block)
-          val matrix = matrixRepr(block)
-          val rotated = rotate(matrix, rotation)
-          val poss = positions(rotated, pos)
-          (col, poss)
-      }.foldLeft(State.uniform(w, h, Color.Background)) {
-        case (state, (color, positions)) =>
-          positions.foldLeft(state)((s, pos) => s.update(pos.y, pos.x, color))
-      }
-    }
-
   }
+
+  object Tetromino {
+
+    //TIL the Tetris pieces are called https://tetris.fandom.com/wiki/Tetromino
+    sealed trait Kind
+
+    object Kind {
+      case object I extends Kind
+
+      case object J extends Kind
+
+      case object L extends Kind
+
+      case object O extends Kind
+
+      case object S extends Kind
+
+      case object T extends Kind
+
+      case object Z extends Kind
+    }
+
+    object Canonical {
+      val I = Tetromino(position = Position.origin, Kind.I, List(Position(0, -1), Position(0, 0), Position(0, 1), Position(0, 2)))
+      val J = Tetromino(position = Position.origin, Kind.J, List(Position(-1, -1), Position(0, -1), Position(0, 0), Position(0, 1)))
+      val L = Tetromino(position = Position.origin, Kind.L, List(Position(-1, 1), Position(0, -1), Position(0, 0), Position(0, 1)))
+      val O = Tetromino(position = Position.origin, Kind.O, List(Position(-1, -1), Position(0, -1), Position(0, 0), Position(-1, 0)))
+      val S = Tetromino(position = Position.origin, Kind.S, List(Position(-1, -1), Position(0, -1), Position(0, 0), Position(1, 0)))
+      val T = Tetromino(position = Position.origin, Kind.T, List(Position(-1, 0), Position(0, 0), Position(1, 0), Position(0, -1)))
+      val Z = Tetromino(position = Position.origin, Kind.Z, List(Position(-1, 0), Position(0, 0), Position(0, -1), Position(1, -1)))
+    }
+
+    case class Position(x: Int, y: Int) {
+      def right = copy(x = x + 1)
+      def left = copy(x = x - 1)
+      def up = copy(y = y + 1)
+      def down = copy(y = y - 1)
+    }
+
+    object Position {
+      val origin = Position(0, 0)
+    }
+
+    def color(t: Kind): Color = t match {
+      case Kind.I => Color.Cyan
+      case Kind.J => Color.Blue
+      case Kind.L => Color.Orange
+      case Kind.O => Color.Yellow
+      case Kind.S => Color.Green
+      case Kind.T => Color.Purple
+      case Kind.Z => Color.Red
+    }
+  }
+
+  def blocksToGridState(blocks: List[Tetromino], w: NonNeg, h: NonNeg): State = {
+    blocks.flatMap { t =>
+        val col = color(t.kind)
+        t.occupiedGrid.map(col -> _)
+    }.foldLeft(State.uniform(w, h, Color.Background)) {
+      case (state, (color, pos)) =>
+        state.update(pos, color)
+    }
+  }
+
 }
 
 object TetrisGameEngine {
   import zio.duration._
   val layer: ZLayer[Clock, Nothing,  Has[GameEngine]] = {
 
-    val blocks = List(
-      (Position(unsafeNonNeg(0), unsafeNonNeg(4)), Tetromino.I, Rotation.North),
-      (Position(unsafeNonNeg(5), unsafeNonNeg(6)), Tetromino.O, Rotation.East),
-      (Position(unsafeNonNeg(10), unsafeNonNeg(6)), Tetromino.L, Rotation.South),
-      (Position(unsafeNonNeg(15), unsafeNonNeg(6)), Tetromino.S, Rotation.West),
-      (Position(unsafeNonNeg(20), unsafeNonNeg(6)), Tetromino.T, Rotation.East),
+    val blocks: List[Tetromino] = List(
+      Tetromino.Canonical.I.copy(position = Position(0, -4)),
+      Tetromino.Canonical.O.copy(position = Position(5, -6)),
+      Tetromino.Canonical.L.copy(position = Position(10, -6)),
+      Tetromino.Canonical.S.copy(position = Position(15, -6)),
+      Tetromino.Canonical.T.copy(position = Position(20, -6))
     )
 
     (for {
       env <- ZIO.environment[Clock]
     } yield new GameEngine {
-      override def stateStream: UStream[GameEngine.State] =
-        ZStream.repeat(Tetromino.blocksToGridState(blocks, Grid.defaultWidth, Grid.defaultHeight))
-          .fixed(1.seconds).provide(env)
+      override def stateStream: UStream[GameEngine.State] = {
+        ZStream.unfold(blocks) { blocks =>
+          val newBlocks: List[Tetromino] = blocks.map(_.rotate90)
+          Some(newBlocks -> newBlocks)
+        }.map(blocks => Tetris.blocksToGridState(blocks, Grid.defaultWidth, Grid.defaultHeight))
+        .fixed(1.seconds).provide(env)
+      }
 
       override def scoreStream: UStream[GameEngine.Score] = ???
     }).toLayer

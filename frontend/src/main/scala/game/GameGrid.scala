@@ -49,7 +49,13 @@ object Grid {
   import eu.timepit.refined.numeric._
   import eu.timepit.refined.auto._
 
-  type ColorMap = Map[(NonNeg, NonNeg), Color]
+  //The position of a Tetromino in the grid. Top left is (0, 0), growing to the bottom right
+  case class GridPosition(x: NonNeg, y: NonNeg)
+  object GridPosition {
+    val origin = GridPosition(zero, zero)
+  }
+
+  type ColorMap = Map[GridPosition, Color]
 
   val defaultWidth: NonNeg   = refineMV[NonNegative](50)
   val defaultHeight: NonNeg  = refineMV[NonNegative](20)
@@ -71,7 +77,7 @@ object Grid {
     cls := ("flex", "flex-row"),
     (0 until width.value).map { c =>
       val colNr = unsafeNonNeg(c)
-      gameCell(size, state.signal.map(_.cell(rowNr, colNr).getOrElse(Color.Background)))
+      gameCell(size, state.signal.map(_.cell(GridPosition(rowNr, colNr)).getOrElse(Color.Background)))
     }
   )
 

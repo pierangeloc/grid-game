@@ -4,7 +4,7 @@ import eu.timepit.refined.numeric.NonNegative
 import eu.timepit.refined.{refineMV, refineV}
 import game.GameEngine.Score
 import GameEngine.{Score, State}
-import Grid.ColorMap
+import Grid.{ColorMap, GridPosition}
 import zio.clock.Clock
 import zio.{Has, UIO, ZIO}
 import zio.random.Random
@@ -17,21 +17,19 @@ trait GameEngine {
 
 object GameEngine {
   case class State(w: NonNeg, h: NonNeg, private val grid: ColorMap = Map()) { self =>
-    def cell(row: NonNeg, col: NonNeg): Option[Color] = grid.get((row, col))
-    def update(row: NonNeg, col: NonNeg, c: Color): State = {
-      copy(grid = self.grid.updated((row, col), c))
+    def cell(gp: GridPosition): Option[Color] = grid.get(gp)
+    def update(gp: GridPosition, c: Color): State = {
+      copy(grid = self.grid.updated(gp, c))
     }
   }
 
   object State {
     val zero: NonNeg = refineMV(0)
     def uniform(w: NonNeg, h: NonNeg, c: Color) = new State(w, h,
-      (
-        for {
-          r <- (0 until h.value)
-          c <- (0 until w.value)
-        } yield (refineV[NonNegative](r).getOrElse(zero), refineV[NonNegative](c).getOrElse(zero))
-        ).map(k => (k, c)).toMap
+      (for {
+        row <- (0 until h.value)
+        col <- (0 until w.value)
+        } yield GridPosition(refineV[NonNegative](row).getOrElse(zero), refineV[NonNegative](col).getOrElse(zero)) -> c).toMap
     )
   }
 
@@ -57,16 +55,16 @@ object RandomGameEngine {
            if (c != Color.Background) UIO(c) else randomColorNoBg
         }
 
-      private val randomPos: ZIO[Random, Nothing, (NonNeg, NonNeg)] =
+      private val randomPos: ZIO[Random, Nothing, GridPosition] =
         zio.random.nextIntBounded(w.value).zipWith(zio.random.nextIntBounded(h.value)) {
-          case (c, r) => (unsafeNonNeg(c), unsafeNonNeg(r))
+          case (c, r) => GridPosition(unsafeNonNeg(c), unsafeNonNeg(r))
         }
 
       override def stateStream: UStream[State] =
         ZStream.unfoldM[Random with Clock, Nothing, State, State](State.uniform(Grid.defaultWidth, Grid.defaultHeight, Color.Background)) { s =>
           (randomColorNoBg zipWith randomPos) {
-            case (c, (col, row)) =>
-              val newState = s.update(row, col, c)
+            case (c, p) =>
+              val newState = s.update(p, c)
               Some(newState -> newState)
           }
         }.fixed(5.millis).provide(env)

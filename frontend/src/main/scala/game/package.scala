@@ -6,5 +6,6 @@ package object game {
   type NonNeg = Int Refined NonNegative
 
   def unsafeNonNeg(x: Int): NonNeg = refineV[NonNegative](x).getOrElse(refineMV(0))
+  val zero: NonNeg = unsafeNonNeg(0)
 
 }
