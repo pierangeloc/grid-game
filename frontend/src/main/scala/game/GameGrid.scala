@@ -49,7 +49,7 @@ object Grid {
   import eu.timepit.refined.numeric._
   import eu.timepit.refined.auto._
 
-  //The position of a Tetromino in the grid. Top left is (0, 0), growing to the bottom right
+  //The position of a cell in the grid. Top left is (0, 0), growing to the bottom right
   case class GridPosition(x: NonNeg, y: NonNeg)
   object GridPosition {
     val origin = GridPosition(zero, zero)
@@ -57,8 +57,8 @@ object Grid {
 
   type ColorMap = Map[GridPosition, Color]
 
-  val defaultWidth: NonNeg   = refineMV[NonNegative](50)
-  val defaultHeight: NonNeg  = refineMV[NonNegative](20)
+  val defaultWidth: NonNeg   = refineMV[NonNegative](20)
+  val defaultHeight: NonNeg  = refineMV[NonNegative](15)
 
   def fromStateStream[R](width: NonNeg, height: NonNeg, states: ZStream[R, Nothing, State]): URIO[R, Div] = for {
     varState <- UIO.effectTotal(Var[State](State.uniform(width, height, Color.Background)))
@@ -77,7 +77,7 @@ object Grid {
     cls := ("flex", "flex-row"),
     (0 until width.value).map { c =>
       val colNr = unsafeNonNeg(c)
-      gameCell(size, state.signal.map(_.cell(GridPosition(rowNr, colNr)).getOrElse(Color.Background)))
+      gameCell(size, state.signal.map(_.cell(GridPosition(colNr, rowNr)).getOrElse(Color.Background)))
     }
   )
 

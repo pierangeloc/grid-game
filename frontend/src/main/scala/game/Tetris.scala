@@ -8,6 +8,11 @@ import zio.clock.Clock
 import zio.stream.{UStream, ZStream}
 import zio.{Has, ZIO, ZLayer}
 
+
+/**
+ * We model the positions according to a cartesian reference system centered on the top left corner of the screen,
+ * with the x axis pointing to the right, and the y axis pointing upwards
+ */
 object Tetris {
 
   case class Tetromino(position: Position, kind: Tetromino.Kind, relativePos: List[Position]) {
@@ -85,9 +90,9 @@ object Tetris {
   def blocksToGridState(blocks: List[Tetromino], w: NonNeg, h: NonNeg): State = {
     blocks.flatMap { t =>
         val col = color(t.kind)
-        t.occupiedGrid.map(col -> _)
+        t.occupiedGrid.map(pos => pos -> col)
     }.foldLeft(State.uniform(w, h, Color.Background)) {
-      case (state, (color, pos)) =>
+      case (state, (pos, color)) =>
         state.update(pos, color)
     }
   }
@@ -99,11 +104,11 @@ object TetrisGameEngine {
   val layer: ZLayer[Clock, Nothing,  Has[GameEngine]] = {
 
     val blocks: List[Tetromino] = List(
-      Tetromino.Canonical.I.copy(position = Position(0, -4)),
-      Tetromino.Canonical.O.copy(position = Position(5, -6)),
-      Tetromino.Canonical.L.copy(position = Position(10, -6)),
-      Tetromino.Canonical.S.copy(position = Position(15, -6)),
-      Tetromino.Canonical.T.copy(position = Position(20, -6))
+      Tetromino.Canonical.I.copy(position = Position(3, -6)),
+      Tetromino.Canonical.O.copy(position = Position(3, -2)),
+      Tetromino.Canonical.L.copy(position = Position(8, -2)),
+      Tetromino.Canonical.S.copy(position = Position(15, -2)),
+      Tetromino.Canonical.T.copy(position = Position(10, -6))
     )
 
     (for {

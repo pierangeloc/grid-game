@@ -5,7 +5,7 @@ object Dependencies {
   object Versions {
     val http4s = "0.21.0-M6"
 
-    val zio       = "1.0.5"
+    val zio       = "1.0.7"
     val zioCats   = "2.4.0.0"
 
     val fs2        = "2.4.4"
@@ -29,6 +29,7 @@ object Dependencies {
     Seq(
       "dev.zio"       %%% "zio"              % Versions.zio,
       "dev.zio"       %%% "zio-streams"      % Versions.zio,
+      "dev.zio"       %%% "zio-prelude"      % "1.0.0-RC4",
       "dev.zio"       %%% "zio-interop-cats" % Versions.zioCats
     )
   )
